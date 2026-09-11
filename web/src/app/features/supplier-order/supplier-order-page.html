@@ -1,0 +1,61 @@
+<main class="page">
+  <h1>Ordine Mensa</h1>
+
+  <section class="card form-card">
+    <h2>{{ monthLabel }} {{ year }}</h2>
+
+    @if (currentOrder(); as order) {
+      <p class="alert alert-success">
+        Ordine già inviato: {{ order.mealsCount }} pasti richiesti.
+      </p>
+    } @else {
+      <p class="field-hint">Nessun ordine ancora inviato per questo mese.</p>
+
+      @if (error()) {
+        <p class="alert alert-danger" role="alert">{{ error() }}</p>
+      }
+      @if (success()) {
+        <p class="alert alert-success">{{ success() }}</p>
+      }
+
+      <div class="form-actions">
+        <button type="button" class="btn" [disabled]="sending() || alreadySent()" (click)="send()">
+          {{ sending() ? 'Invio in corso…' : 'Invia Ordine al Fornitore' }}
+        </button>
+      </div>
+    }
+  </section>
+
+  <section>
+    <h2>Storico ordini</h2>
+    @if (history(); as list) {
+      @if (list.length > 0) {
+        <div class="table-wrap card">
+          <table class="responsive-table">
+            <thead>
+              <tr><th>Mese</th><th>Anno</th><th>Pasti</th><th>Stato</th></tr>
+            </thead>
+            <tbody>
+              @for (o of list; track o.id) {
+                <tr>
+                  <td data-label="Mese">{{ monthName(o.month) }}</td>
+                  <td data-label="Anno">{{ o.year }}</td>
+                  <td data-label="Pasti">{{ o.mealsCount }}</td>
+                  <td data-label="Stato">
+                    <span class="badge" [class]="o.status === 'inviato' ? 'badge-success' : 'badge-warning'">
+                      {{ o.status === 'inviato' ? 'Inviato' : 'Bozza' }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="empty-state card">Nessun ordine in archivio.</p>
+      }
+    } @else {
+      <p class="empty-state card" aria-live="polite">Caricamento in corso…</p>
+    }
+  </section>
+</main>

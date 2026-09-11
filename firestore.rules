@@ -1,0 +1,101 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function authed() {
+      return request.auth != null;
+    }
+
+    function role() {
+      return request.auth.token.role;
+    }
+
+    function isStaff() {
+      return authed() && (role() == 'admin' || role() == 'operatore');
+    }
+
+    function isAdmin() {
+      return authed() && role() == 'admin';
+    }
+
+    function isReadOnly() {
+      return authed() && role() == 'sola_lettura';
+    }
+
+    function isOwnFamily(familyId) {
+      return authed() && role() == 'famiglia' && request.auth.token.familyId == familyId;
+    }
+
+    function canReadFamilyScoped(familyId) {
+      return isStaff() || isReadOnly() || isOwnFamily(familyId);
+    }
+
+    // families: dati anagrafici famiglia. Scrittura diretta consentita allo staff
+    // (a differenza dei log/saldi, non ha effetti collaterali cross-documento).
+    match /families/{familyId} {
+      allow read: if canReadFamilyScoped(familyId);
+      allow create, update: if isStaff();
+      allow delete: if isAdmin();
+    }
+
+    // students: anagrafica + saldi biglietti denormalizzati (ticketsPurchased/
+    // ticketsUsed/ticketsRemaining/ticketStatus/lastAlertSentAt). I campi saldo
+    // sono scrivibili SOLO dalle Cloud Functions (Admin SDK, bypassa le rules):
+    // qui si impedisce esplicitamente qualunque scrittura client su quei campi,
+    // replicando le "colonne protette" del foglio Google Sheets originale (BR-04/BR-05).
+    match /students/{studentId} {
+      allow read: if canReadFamilyScoped(resource.data.familyId);
+
+      allow create: if isStaff()
+        && request.resource.data.ticketsPurchased == 0
+        && request.resource.data.ticketsUsed == 0
+        && request.resource.data.ticketsRemaining == 0
+        && request.resource.data.ticketStatus == 'sufficienti'
+        && request.resource.data.lastAlertSentAt == null;
+
+      allow update: if isStaff()
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'ticketsPurchased', 'ticketsUsed', 'ticketsRemaining',
+          'ticketStatus', 'lastAlertSentAt'
+        ]);
+
+      allow delete: if false; // niente cancellazioni dirette: uscita alunno = status 'archiviato'
+    }
+
+    // topUps / usages: log immutabili con effetti collaterali cross-documento
+    // (aggiornamento saldi, invio email, controllo anti-duplicato). Le scritture
+    // passano SOLO dalle callable Function (registerTopUp/registerUsage), mai
+    // dal client diretto: qui si nega sempre, in difesa in profondità.
+    match /topUps/{topUpId} {
+      allow read: if canReadFamilyScoped(resource.data.familyId);
+      allow create, update, delete: if false;
+    }
+
+    match /usages/{usageId} {
+      allow read: if canReadFamilyScoped(resource.data.familyId);
+      allow create, update, delete: if false;
+    }
+
+    // monthlyOrders: unicità mensile garantita dall'ID documento (yyyy-mm) e
+    // dalla callable sendSupplierOrder, che gira in transazione. Nessuna
+    // scrittura client diretta (evita di aggirare il controllo "già inviato").
+    match /monthlyOrders/{orderId} {
+      allow read: if isStaff();
+      allow create, update, delete: if false;
+    }
+
+    // settings: pannello di controllo (soglia, Test Mode, template email).
+    // Lettura anche per l'operatore (mostra la soglia in UI), scrittura solo admin.
+    match /settings/{docId} {
+      allow read: if isStaff();
+      allow write: if isAdmin();
+    }
+
+    // auditLog: scritto solo dalle Cloud Functions (trigger generico), mai dal client.
+    match /auditLog/{logId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+  }
+}

@@ -1,0 +1,42 @@
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: var(--color-bg);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 360px;
+  padding: var(--space-8) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.login-card__title {
+  font-size: 1.375rem;
+  text-align: center;
+  color: var(--color-primary-dark);
+}
+
+.login-card__subtitle {
+  margin: calc(var(--space-4) * -1) 0 0;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.9375rem;
+}
+
+.login-card__submit {
+  width: 100%;
+  margin-top: var(--space-2);
+}
+
+/* Schermi molto stretti: meno padding laterale sulla card per non sprecare spazio. */
+@media (max-width: 400px) {
+  .login-card {
+    padding: var(--space-6) var(--space-4);
+  }
+}

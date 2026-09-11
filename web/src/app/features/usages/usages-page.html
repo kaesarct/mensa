@@ -1,0 +1,75 @@
+<main class="page">
+  <h1>Log Utilizzi</h1>
+
+  <form class="card form-card" (ngSubmit)="submit()">
+    <div class="form-grid">
+      <div class="field">
+        <label for="student">Alunno</label>
+        <select id="student" name="student" [(ngModel)]="studentId" (ngModelChange)="onStudentChange()" required>
+          <option value="" disabled>Seleziona alunno…</option>
+          @for (s of students(); track s.id) {
+            <option [value]="s.id">{{ s.cognome }} {{ s.nome }} ({{ s.classe }}{{ s.sezione }})</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label for="quantity">Buoni usati</label>
+        <input id="quantity" type="number" min="1" name="quantity" [(ngModel)]="quantity" required />
+      </div>
+      <div class="field">
+        <label for="classSection">Classe/Sezione</label>
+        <input id="classSection" name="classSection" [(ngModel)]="classSection" required />
+      </div>
+      <div class="field">
+        <label for="date">Data utilizzo</label>
+        <input id="date" type="date" name="date" [(ngModel)]="date" required />
+      </div>
+    </div>
+    <div class="field">
+      <label for="note">Note</label>
+      <input id="note" name="note" [(ngModel)]="note" />
+    </div>
+
+    @if (error()) {
+      <p class="alert alert-danger" role="alert">{{ error() }}</p>
+    }
+    @if (success()) {
+      <p class="alert alert-success">{{ success() }}</p>
+    }
+
+    <div class="form-actions">
+      <button type="submit" class="btn" [disabled]="saving()">
+        {{ saving() ? 'Registrazione…' : 'Registra utilizzo' }}
+      </button>
+    </div>
+  </form>
+
+  <section>
+    <h2>Storico</h2>
+    @if (history(); as list) {
+      @if (list.length > 0) {
+        <div class="table-wrap card">
+          <table class="responsive-table">
+            <thead>
+              <tr><th>Data</th><th>Alunno</th><th>Quantità</th><th>Classe/Sezione</th></tr>
+            </thead>
+            <tbody>
+              @for (u of list; track u.id) {
+                <tr>
+                  <td data-label="Data">{{ fmtDate(u.date) }}</td>
+                  <td data-label="Alunno">{{ studentLabel(u.studentId) }}</td>
+                  <td data-label="Quantità">{{ u.quantity }}</td>
+                  <td data-label="Classe/Sezione">{{ u.classSection }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="empty-state card">Nessun utilizzo registrato.</p>
+      }
+    } @else {
+      <p class="empty-state card" aria-live="polite">Caricamento in corso…</p>
+    }
+  </section>
+</main>

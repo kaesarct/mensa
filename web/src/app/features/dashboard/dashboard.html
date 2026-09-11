@@ -1,0 +1,54 @@
+<main class="page">
+  <h1>Dashboard</h1>
+
+  <div class="kpi-grid">
+    <div class="kpi-card card">
+      <span class="kpi-card__value">{{ totalStudents() ?? '—' }}</span>
+      <span class="kpi-card__label">Alunni totali</span>
+    </div>
+    <div class="kpi-card card">
+      <span class="kpi-card__value">{{ belowThreshold() ?? '—' }}</span>
+      <span class="kpi-card__label">Sotto soglia</span>
+    </div>
+    <div class="kpi-card card">
+      <span class="kpi-card__value">{{ activeAlerts() ?? '—' }}</span>
+      <span class="kpi-card__label">Avvisi attivi</span>
+    </div>
+    <div class="kpi-card card">
+      <span class="kpi-card__value">{{ totalUsed() ?? '—' }}</span>
+      <span class="kpi-card__label">Buoni usati (totale)</span>
+    </div>
+  </div>
+
+  <section>
+    <h2>Alunni che necessitano ricarica</h2>
+    @if (urgentStudents(); as list) {
+      @if (list.length > 0) {
+        <div class="table-wrap card">
+          <table class="responsive-table">
+            <thead>
+              <tr><th>Cognome</th><th>Nome</th><th>Classe</th><th>Rimanenti</th><th>Stato</th></tr>
+            </thead>
+            <tbody>
+              @for (s of list; track s.id) {
+                <tr>
+                  <td data-label="Cognome"><a [routerLink]="['/students', s.id]">{{ s.cognome }}</a></td>
+                  <td data-label="Nome">{{ s.nome }}</td>
+                  <td data-label="Classe">{{ s.classe }}{{ s.sezione }}</td>
+                  <td data-label="Rimanenti">{{ s.ticketsRemaining }}</td>
+                  <td data-label="Stato">
+                    <span class="badge" [class]="badgeClass[s.ticketStatus]">{{ statusLabel[s.ticketStatus] }}</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="empty-state card">Nessun alunno sotto soglia.</p>
+      }
+    } @else {
+      <p class="empty-state card" aria-live="polite">Caricamento in corso…</p>
+    }
+  </section>
+</main>

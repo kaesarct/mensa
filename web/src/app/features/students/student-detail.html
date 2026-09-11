@@ -1,0 +1,165 @@
+<main class="page">
+  <div class="page-header">
+    <h1>
+      @if (isCreate()) {
+        Nuovo alunno
+      } @else if (student(); as s) {
+        {{ s.cognome }} {{ s.nome }}
+      } @else {
+        Alunno
+      }
+    </h1>
+    <a class="btn btn-secondary" routerLink="/students">← Torna alla lista</a>
+  </div>
+
+  @if (!isCreate() && student() === undefined) {
+    <p class="empty-state card" aria-live="polite">Caricamento in corso…</p>
+  } @else if (!isCreate() && student() === null) {
+    <p class="alert alert-danger">Alunno non trovato o accesso non consentito.</p>
+  } @else {
+    @if (isStaff()) {
+      <form class="card form-card" (ngSubmit)="submit()">
+        <div class="form-grid">
+          <div class="field">
+            <label for="familyId">Famiglia</label>
+            <select id="familyId" name="familyId" [(ngModel)]="familyId" required>
+              <option value="" disabled>Seleziona famiglia…</option>
+              @for (f of families(); track f.id) {
+                <option [value]="f.id">{{ f.cognome }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="nome">Nome</label>
+            <input id="nome" name="nome" [(ngModel)]="nome" required />
+          </div>
+          <div class="field">
+            <label for="cognome">Cognome</label>
+            <input id="cognome" name="cognome" [(ngModel)]="cognome" required />
+          </div>
+          <div class="field">
+            <label for="dataNascita">Data di nascita</label>
+            <input id="dataNascita" type="date" name="dataNascita" [(ngModel)]="dataNascita" required />
+          </div>
+          <div class="field">
+            <label for="classe">Classe</label>
+            <input id="classe" name="classe" [(ngModel)]="classe" placeholder="es. 3" />
+          </div>
+          <div class="field">
+            <label for="sezione">Sezione</label>
+            <input id="sezione" name="sezione" [(ngModel)]="sezione" placeholder="es. A" />
+          </div>
+          <div class="field">
+            <label for="status">Stato</label>
+            <select id="status" name="status" [(ngModel)]="status">
+              <option value="attivo">Attivo</option>
+              <option value="archiviato">Archiviato</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="note">Note (es. allergie)</label>
+          <textarea id="note" name="note" [(ngModel)]="note"></textarea>
+          <span class="field-hint">Dato sensibile: verificare che sia stato raccolto il consenso dei genitori.</span>
+        </div>
+
+        @if (error()) {
+          <p class="alert alert-danger" role="alert">{{ error() }}</p>
+        }
+
+        <div class="form-actions">
+          <button type="submit" class="btn" [disabled]="saving()">
+            {{ saving() ? 'Salvataggio…' : 'Salva' }}
+          </button>
+        </div>
+      </form>
+    } @else if (student(); as s) {
+      <dl class="card form-card detail-list">
+        <dt>Nome</dt><dd>{{ s.nome }} {{ s.cognome }}</dd>
+        <dt>Classe</dt><dd>{{ s.classe }}{{ s.sezione }}</dd>
+        <dt>Note</dt><dd>{{ s.note || '—' }}</dd>
+      </dl>
+    }
+
+    @if (!isCreate() && student(); as s) {
+      <section class="card form-card">
+        <h2>Saldo biglietti</h2>
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-card__value">{{ s.ticketsRemaining }}</span>
+            <span class="kpi-card__label">Rimanenti</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-card__value">{{ s.ticketsPurchased }}</span>
+            <span class="kpi-card__label">Acquistati</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-card__value">{{ s.ticketsUsed }}</span>
+            <span class="kpi-card__label">Utilizzati</span>
+          </div>
+          <div class="kpi-card">
+            <span class="badge" [class]="badgeClass[s.ticketStatus]">{{ statusLabel[s.ticketStatus] }}</span>
+            <span class="kpi-card__label">Stato</span>
+          </div>
+        </div>
+
+        @if (isStaff()) {
+          <div class="form-actions">
+            <a class="btn btn-sm" [routerLink]="['/top-ups']" [queryParams]="{ studentId: id() }">Registra ricarica</a>
+            <a class="btn btn-sm btn-secondary" [routerLink]="['/usages']" [queryParams]="{ studentId: id() }">
+              Registra utilizzo
+            </a>
+          </div>
+        }
+      </section>
+
+      <section class="card form-card">
+        <h2>Storico ricariche</h2>
+        @if (topUps().length > 0) {
+          <div class="table-wrap">
+            <table class="responsive-table">
+              <thead>
+                <tr><th>Data</th><th>Importo</th><th>Riferimento</th></tr>
+              </thead>
+              <tbody>
+                @for (t of topUps(); track t.id) {
+                  <tr>
+                    <td data-label="Data">{{ fmtDate(t.date) }}</td>
+                    <td data-label="Importo">{{ t.amount }}</td>
+                    <td data-label="Riferimento">{{ t.bonificoRef }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="field-hint">Nessuna ricarica registrata.</p>
+        }
+      </section>
+
+      <section class="card form-card">
+        <h2>Storico utilizzi</h2>
+        @if (usages().length > 0) {
+          <div class="table-wrap">
+            <table class="responsive-table">
+              <thead>
+                <tr><th>Data</th><th>Quantità</th><th>Classe/Sezione</th></tr>
+              </thead>
+              <tbody>
+                @for (u of usages(); track u.id) {
+                  <tr>
+                    <td data-label="Data">{{ fmtDate(u.date) }}</td>
+                    <td data-label="Quantità">{{ u.quantity }}</td>
+                    <td data-label="Classe/Sezione">{{ u.classSection }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="field-hint">Nessun utilizzo registrato.</p>
+        }
+      </section>
+    }
+  }
+</main>

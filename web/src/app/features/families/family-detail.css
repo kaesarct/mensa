@@ -1,0 +1,12 @@
+h2 {
+  font-size: 1.0625rem;
+}
+
+.children-list {
+  margin: 0;
+  padding-left: var(--space-6);
+}
+
+.children-list li {
+  margin-bottom: var(--space-2);
+}

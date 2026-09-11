@@ -1,0 +1,75 @@
+<main class="page">
+  <h1>Impostazioni</h1>
+
+  @if (settings(); as s) {
+    <form class="card form-card" (ngSubmit)="submit()">
+      <div class="form-grid">
+        <div class="field">
+          <label for="minThreshold">Soglia minima biglietti</label>
+          <input id="minThreshold" type="number" min="0" name="minThreshold" [(ngModel)]="minThreshold" required />
+        </div>
+        <div class="field">
+          <label for="supplierEmail">Email fornitore</label>
+          <input id="supplierEmail" type="email" name="supplierEmail" [(ngModel)]="supplierEmail" required />
+        </div>
+        <div class="field field-checkbox">
+          <input id="testMode" type="checkbox" name="testMode" [(ngModel)]="testMode" />
+          <label for="testMode">Test Mode attivo</label>
+        </div>
+        <div class="field field-checkbox">
+          <input
+            id="blockNegativeBalance"
+            type="checkbox"
+            name="blockNegativeBalance"
+            [(ngModel)]="blockNegativeBalance"
+          />
+          <label for="blockNegativeBalance">Impedisci saldo negativo</label>
+        </div>
+      </div>
+      <span class="field-hint">
+        Se attivo, la registrazione di un utilizzo viene rifiutata quando porterebbe i biglietti rimanenti sotto
+        zero (0 biglietti resta comunque "Esaurito" ed è sempre consentito).
+      </span>
+      <div class="field">
+        <label for="testEmails">Email di test (separate da virgola)</label>
+        <input id="testEmails" name="testEmails" [(ngModel)]="testEmailsText" />
+        <span class="field-hint">
+          Con Test Mode attivo, TUTTE le email (avviso soglia, buono usato, ordine fornitore) vanno solo qui.
+        </span>
+      </div>
+
+      <h2>Template email</h2>
+      <span class="field-hint">Segnaposto disponibili: [ID] [NOME] [COGNOME] [BIGLIETTI] [RIMANENTI] [PASTI] [MESE] [ANNO]</span>
+
+      <div class="field">
+        <label for="alertSubject">Oggetto — Avviso soglia minima</label>
+        <input id="alertSubject" name="alertSubject" [(ngModel)]="alertSubject" />
+      </div>
+      <div class="field">
+        <label for="alertBody">Testo — Avviso soglia minima</label>
+        <textarea id="alertBody" name="alertBody" [(ngModel)]="alertBody"></textarea>
+      </div>
+      <div class="field">
+        <label for="usedBody">Testo — Buono usato</label>
+        <textarea id="usedBody" name="usedBody" [(ngModel)]="usedBody"></textarea>
+      </div>
+      <div class="field">
+        <label for="orderBody">Testo — Ordine fornitore</label>
+        <textarea id="orderBody" name="orderBody" [(ngModel)]="orderBody"></textarea>
+      </div>
+
+      @if (error()) {
+        <p class="alert alert-danger" role="alert">{{ error() }}</p>
+      }
+      @if (success()) {
+        <p class="alert alert-success">{{ success() }}</p>
+      }
+
+      <div class="form-actions">
+        <button type="submit" class="btn" [disabled]="saving()">{{ saving() ? 'Salvataggio…' : 'Salva' }}</button>
+      </div>
+    </form>
+  } @else {
+    <p class="empty-state card" aria-live="polite">Caricamento in corso…</p>
+  }
+</main>

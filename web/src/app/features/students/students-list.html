@@ -1,0 +1,45 @@
+<main class="page">
+  <div class="page-header">
+    <h1>Alunni</h1>
+    @if (isStaff()) {
+      <a class="btn" routerLink="/students/new">Nuovo alunno</a>
+    }
+  </div>
+
+  @if (students(); as list) {
+    @if (list.length > 0) {
+      <div class="table-wrap card">
+        <table class="responsive-table">
+          <thead>
+            <tr>
+              <th>Cognome</th>
+              <th>Nome</th>
+              <th>Classe</th>
+              <th>Biglietti rimanenti</th>
+              <th>Stato</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (student of list; track student.id) {
+              <tr>
+                <td data-label="Cognome"><a [routerLink]="['/students', student.id]">{{ student.cognome }}</a></td>
+                <td data-label="Nome">{{ student.nome }}</td>
+                <td data-label="Classe">{{ student.classe }}{{ student.sezione }}</td>
+                <td data-label="Biglietti rimanenti">{{ student.ticketsRemaining }}</td>
+                <td data-label="Stato">
+                  <span class="badge" [class]="badgeClass(student.ticketStatus)">
+                    {{ statusLabel(student.ticketStatus) }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <p class="empty-state card">Nessun alunno visibile.</p>
+    }
+  } @else {
+    <p class="empty-state card" aria-live="polite">Caricamento in corso…</p>
+  }
+</main>

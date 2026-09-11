@@ -1,0 +1,41 @@
+<main class="login-page">
+  <form class="login-card card" (ngSubmit)="submit()">
+    <h1 class="login-card__title">Mensa Scolastica</h1>
+    <p class="login-card__subtitle">Accedi al tuo account</p>
+
+    <div class="field">
+      <label for="email">Email</label>
+      <input
+        id="email"
+        type="email"
+        name="email"
+        [(ngModel)]="email"
+        required
+        autocomplete="username"
+        autofocus
+        [disabled]="loading()"
+      />
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        name="password"
+        [(ngModel)]="password"
+        required
+        autocomplete="current-password"
+        [disabled]="loading()"
+      />
+    </div>
+
+    @if (error()) {
+      <p class="alert alert-danger" role="alert">{{ error() }}</p>
+    }
+
+    <button type="submit" class="btn login-card__submit" [disabled]="loading()" [attr.aria-busy]="loading()">
+      {{ loading() ? 'Accesso in corso…' : 'Accedi' }}
+    </button>
+  </form>
+</main>

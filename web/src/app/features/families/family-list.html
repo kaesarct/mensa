@@ -1,0 +1,39 @@
+<main class="page">
+  <div class="page-header">
+    <h1>Famiglie</h1>
+    @if (isStaff()) {
+      <a class="btn" routerLink="/families/new">Nuova famiglia</a>
+    }
+  </div>
+
+  @if (rows(); as list) {
+    @if (list.length > 0) {
+      <div class="table-wrap card">
+        <table class="responsive-table">
+          <thead>
+            <tr>
+              <th>Cognome</th>
+              <th>Email</th>
+              <th>Figli</th>
+              <th>Biglietti rimanenti (totale)</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of list; track row.id) {
+              <tr>
+                <td data-label="Cognome"><a [routerLink]="['/families', row.id]">{{ row.cognome }}</a></td>
+                <td data-label="Email">{{ row.emails.join(', ') }}</td>
+                <td data-label="Figli">{{ row.childrenCount }}</td>
+                <td data-label="Biglietti rimanenti (totale)">{{ row.ticketsRemaining }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <p class="empty-state card">Nessuna famiglia registrata.</p>
+    }
+  } @else {
+    <p class="empty-state card" aria-live="polite">Caricamento in corso…</p>
+  }
+</main>

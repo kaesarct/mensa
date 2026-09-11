@@ -26,3 +26,19 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Cloud Functions build output
+/functions/lib/
+
+# Firebase Emulator Suite
+/.emulator-data/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+pubsub-debug.log
+/.firebase/
+
+# Environment files (tutte le cartelle, non solo la root)
+.env
+.env.local
+!.env.example

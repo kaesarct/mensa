@@ -1,0 +1,33 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function authed() {
+      return request.auth != null;
+    }
+
+    function role() {
+      return request.auth.token.role;
+    }
+
+    function isStaff() {
+      return authed() && (role() == 'admin' || role() == 'operatore');
+    }
+
+    function isOwnFamily(familyId) {
+      return authed() && role() == 'famiglia' && request.auth.token.familyId == familyId;
+    }
+
+    // Documenti di bonifico caricati dall'operatore in fase di registrazione
+    // ricarica (sostituiscono i link Google Drive del foglio attuale).
+    // Path: topUpDocuments/{familyId}/{topUpId}-{nomefile}
+    match /topUpDocuments/{familyId}/{fileName} {
+      allow read: if isStaff() || isOwnFamily(familyId);
+      allow write: if isStaff()
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('application/pdf|image/.*');
+      allow delete: if false; // documenti di bonifico immutabili, come il log ricariche
+    }
+  }
+}
