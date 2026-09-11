@@ -1,0 +1,4 @@
+questo il messaggio che dovreste ricevere dal programmino quando viene usato il buono:
+
+Sul conto mensa con ID 6524939 è stato utilizzato un buono pasto per la 
+CLASSE # SEZ A-B.. Rimangono 1  Biglietti. Cordiali Saluti. *** 
